@@ -1,0 +1,10 @@
+[package]
+name = "sharded-timing-wheel"
+version = "0.1.0"
+edition = "2024"
+authors = ["Ankur Rathore <rathore.ankur@gmail.com>"]
+description = "A cache-aware, hierarchical timing wheel implementation based on Varghese & Lauck (1987)."
+license = "MIT"
+repository = "https://github.com/ankurrathore/sharded-timing-wheel"
+
+[dependencies]
