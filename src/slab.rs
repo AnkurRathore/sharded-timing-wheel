@@ -1,8 +1,6 @@
 use core::panic;
 
-const WHEEL_SIZE: usize = 64; //2^6 slots per wheel
-const WHEEL_BITS: u32 = 6;
-const NUM_LEVELS: usize = 4; //Supports upto 64^4 = 16,777,216 ticks
+
 
 
 /// A Timer Entry stored in the slab allocator
