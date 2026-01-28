@@ -3,6 +3,7 @@
 /// "Hashed and Hierarchical Timing Wheels: Efficient Data Structures for Implementing a Timer Facility"
 
 mod slab;
+mod wheel;
 fn main() {
     println!("Hello, world!");
 }

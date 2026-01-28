@@ -10,6 +10,7 @@ pub struct TimerEntry<T> {
     pub deadline: u64,
     pub next: Option<usize>, // Index of the next TimerEntry in the slab
     pub prev: Option<usize>, // Index of the previous TimerEntry in the slab
+    pub level: usize,        // The wheel level this entry belongs to
 }
 
 enum Entry<T> {
@@ -34,7 +35,7 @@ impl<T> Slab<T>{
     }
 
     /// Allocate a new entry, resusing freed slots if available
-    pub fn alloc(&mut self, task:T, deadline: u64) -> usize {
+    pub fn alloc(&mut self, task: T, deadline: u64, level: usize) -> usize {
 
         //Case 1: There is a free slot in the middle
         if self.next_free != usize::MAX{
@@ -55,6 +56,7 @@ impl<T> Slab<T>{
             deadline,
             next: None,
             prev: None,
+            level,
         });
         return idx;
     }
@@ -65,6 +67,7 @@ impl<T> Slab<T>{
         deadline,
         next: None,
         prev: None,
+        level,
     }));
     idx
 
@@ -119,8 +122,8 @@ mod tests {
     fn test_basic_allocation() {
         let mut slab = Slab::new();
         
-        let id_a = slab.alloc("Task A", 100);
-        let id_b = slab.alloc("Task B", 200);
+        let id_a = slab.alloc("Task A", 100, 0);
+        let id_b = slab.alloc("Task B", 200, 0);
 
         assert_eq!(id_a, 0); // First item should be index 0
         assert_eq!(id_b, 1); // Second item should be index 1
@@ -136,28 +139,28 @@ mod tests {
         // This is the CRITICAL test 
         let mut slab = Slab::new();
         
-        let id_1 = slab.alloc(1, 10); // Index 0
-        let id_2 = slab.alloc(2, 10); // Index 1
-        let id_3 = slab.alloc(3, 10); // Index 2
+        let id_1 = slab.alloc(1, 10, 0); // Index 0
+        let id_2 = slab.alloc(2, 10, 0); // Index 1
+        let id_3 = slab.alloc(3, 10, 0); // Index 2
 
         // Free the middle one (Index 1)
         let freed_val = slab.free(id_2);
         assert_eq!(freed_val, Some(2));
 
         // Now allocate a new one. It MUST reuse Index 1.
-        let id_4 = slab.alloc(4, 10);
+        let id_4 = slab.alloc(4, 10, 0);
         
         assert_eq!(id_4, 1, "Slab did not reuse the freed slot!");
         
         // Allocate another. Should be Index 3 (since 1 is taken and 0,2 were never freed)
-        let id_5 = slab.alloc(5, 10);
+        let id_5 = slab.alloc(5, 10, 0);
         assert_eq!(id_5, 3);
     }
 
     #[test]
     fn test_double_free_protection() {
         let mut slab = Slab::new();
-        let id = slab.alloc("A", 10);
+        let id = slab.alloc("A", 10, 0);
 
         // Free once
         assert!(slab.free(id).is_some());
@@ -172,7 +175,7 @@ mod tests {
         
         // 1. Fill it up by forcing vector growth
         for i in 0..100 {
-            slab.alloc(i, i as u64);
+            slab.alloc(i, i as u64, 0);
         }
         
         // 2. Free all even numbers
@@ -185,7 +188,7 @@ mod tests {
         let capacity_before = slab.entries.capacity();
         
         for i in 0..50 {
-            slab.alloc(i * 100, 0);
+            slab.alloc(i * 100, 0, 0);
         }
 
                
