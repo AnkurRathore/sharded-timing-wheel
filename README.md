@@ -23,7 +23,7 @@ This project implements a **Hierarchical Timing Wheel** (Hashed Wheel Timer) foc
 
 ## 🏗️ Architecture
 
-### 1. The Engine: Intrusive Slab Allocator (Current Status: ✅ Complete)
+### 1. The Engine: Intrusive Slab Allocator 
 Instead of using `Vec<Box<Node>>`, I have implemented a custom Slab with an **Intrusive Free List**.
 
 *   **Contiguous Memory:** All timer entries live in a single `Vec<Entry>`.
@@ -34,7 +34,7 @@ Instead of using `Vec<Box<Node>>`, I have implemented a custom Slab with an **In
 // Visual representation of the memory layout
 [ Occupied(Task A) | Free(Next=4) | Occupied(Task B) | Occupied(Task C) | Free(Next=End) ]
 ```
-### 2. The Algorithm: Varghese & Lauck Hierarchy (Current Status: 🚧 In Progress)
+### 2. The Algorithm: Varghese & Lauck Hierarchy
 I am currently implementing the "Scheme 6" Hierarchical Wheel:
 1. Granularity: 4 levels of wheels (Seconds, Minutes, Hours...).
 2. Bitwise Optimization: Using powers of 2 (64 slots) to replace expensive Modulo (%) instructions with fast Bitwise AND (&) instructions.
