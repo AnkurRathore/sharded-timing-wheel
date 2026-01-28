@@ -133,5 +133,46 @@ impl<T> TimingWheel<T>{
     expired
     
     }
-        
+
+    /// Core Tick Algorithm
+    /// Advances time by 1 tick and returns all expired timers
+    pub fn tick(&mut self) -> Vec<T>{
+        let mut expired = Vec::new();
+
+        // Step 1: Process Level 0, current slot
+        let slot0 = (self.current_tick & WHEEL_MASK) as usize;
+        expired.extend(self.process_bucket(0, slot0));
+
+        // Step 2 Advance current tick
+        self.current_tick += 1;
+
+        // Step 3: Cascade Check
+
+        //Check level 1 (every 64 ticks: when lower 6 bits are 0)
+        if (self.current_tick & 0x3F) == 0{
+            let slot1 = ((self.current_tick >> WHEEL_BITS) & WHEEL_MASK) as usize;
+            self.process_bucket(1, slot1);
+
+        }
+
+        // Check level 2 (every 64^2 ticks: when lower 12 bits are 0)
+        if (self.current_tick & 0xFFF) == 0{
+            let slot2 = ((self.current_tick >> (2 * WHEEL_BITS)) & WHEEL_MASK) as usize;
+            self.process_bucket(2, slot2);
+
+        }
+        // Check level 3 (every 64^3 ticks: when lower 18 bits are 0)
+        if (self.current_tick & 0x3FFFF) == 0{
+            let slot3 = ((self.current_tick >> (3 * WHEEL_BITS)) & WHEEL_MASK) as usize;
+            self.process_bucket(3, slot3);
+
+        }
+        expired
+    }
+
+    pub fn current_time(&self) -> u64{
+        self.current_tick
+    }
 }
+
+
