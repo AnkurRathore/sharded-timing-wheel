@@ -8,3 +8,8 @@ license = "MIT"
 repository = "https://github.com/ankurrathore/sharded-timing-wheel"
 
 [dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "wheel_benchmark"
+harness = false

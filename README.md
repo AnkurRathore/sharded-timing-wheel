@@ -40,34 +40,18 @@ I am currently implementing the "Scheme 6" Hierarchical Wheel:
 2. Bitwise Optimization: Using powers of 2 (64 slots) to replace expensive Modulo (%) instructions with fast Bitwise AND (&) instructions.
 3. Cascading: Timers automatically "fall down" to lower-resolution wheels as time progresses.
 
-## 🛠️ Usage (Slab Allocator)
-
-```rust
-use sharded_timing_wheel::slab::Slab;
-
-fn main() {
-    // Initialize the arena
-    let mut slab = Slab::new();
-
-    // O(1) Allocation (No heap fragmentation)
-    let id1 = slab.alloc("Connection_1", 100);
-    let id2 = slab.alloc("Connection_2", 200);
-
-    // O(1) Deallocation (Slot is added to free list)
-    slab.free(id1);
-
-    // Reuse: This will instantly fill the slot vacated by id1
-    // preserving cache locality.
-    let id3 = slab.alloc("Connection_3", 300);
-}
-```
 ## 🔬 Performance Goals
-I aim to benchmark this against std::collections::BinaryHeap using criterion.
-| Metric | BinaryHeap (Standard) | Timing Wheel (Target) |
-| :--- | :--- | :--- |
-| Insert Complexity | O(log N) | O(1) |
-| Cancel Complexity | O(N) or O(log N) | O(1) |
-| L1 Cache Misses | High (Pointer Chasing) | Low (Linear Access) |
+### Benchmark Results
+Benchmarks run on `criterion` comparing `sharded-timing-wheel` vs `std::collections::BinaryHeap`.
+
+| Operation | Scale (N) | Heap (Standard) | Wheel (This Crate) | Improvement |
+| :--- | :--- | :--- | :--- | :--- |
+| **Insert** | 1,000,000 | **2.0 ms** | 64.5 ms | (Slower due to Linked List overhead) |
+| **Cancel** | 10,000 | 50.6 ms | **0.056 ms** | **900x FASTER**  |
+
+### Analysis
+*   **Insertion:** The Binary Heap wins on raw insertion because it is backed by a simple contiguous vector. The Wheel pays a constant-time overhead to maintain the Intrusive Doubly-Linked List nodes (updating `next`/`prev` pointers).
+*   **Cancellation:** This is the critical metric for network timeouts (TCP/QUIC). The Heap requires a linear scan ($O(N)$) to find a task to cancel. The Wheel uses the Slab index to locate and unlink the task in **$O(1)$ constant time**.
 
 ## 📚 References
 1. Varghese, G., & Lauck, A. (1987). Hashed and hierarchical timing wheels: data structures for the efficient implementation of a timer facility.
