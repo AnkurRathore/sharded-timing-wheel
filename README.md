@@ -44,10 +44,10 @@ I am currently implementing the "Scheme 6" Hierarchical Wheel:
 ### Benchmark Results
 Benchmarks run on `criterion` comparing `sharded-timing-wheel` vs `std::collections::BinaryHeap`.
 
-| Operation | Scale (N) | Heap (Standard) | Wheel (This Crate) | Improvement |
+| Operation | Scale (N) | Heap (Standard) | Wheel (v0.2 Optimized) | Improvement |
 | :--- | :--- | :--- | :--- | :--- |
-| **Insert** | 1,000,000 | **2.0 ms** | 64.5 ms | (Slower due to Linked List overhead) |
-| **Cancel** | 10,000 | 50.6 ms | **0.056 ms** | **900x FASTER**  |
+| **Insert** | 1,000,000 | **2.0 ms** | 46.0 ms | (Slower, but gap narrowed by 30%) |
+| **Cancel** | 10,000 | 50.6 ms | **0.030 ms** | **1,600x FASTER** |
 
 ### Analysis
 *   **Insertion:** The Binary Heap wins on raw insertion because it is backed by a simple contiguous vector. The Wheel pays a constant-time overhead to maintain the Intrusive Doubly-Linked List nodes (updating `next`/`prev` pointers).
