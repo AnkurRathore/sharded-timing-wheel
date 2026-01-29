@@ -1,11 +1,10 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use sharded_timing_wheel::wheel::TimingWheel;
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 
 // Helper to find and remove from heap (simulating cancellation)
 fn heap_cancel(heap: &mut BinaryHeap<Reverse<u64>>, target: u64) {
-    
     let mut vec = heap.clone().into_vec();
     if let Some(pos) = vec.iter().position(|x| x.0 == target) {
         vec.remove(pos);
@@ -15,8 +14,8 @@ fn heap_cancel(heap: &mut BinaryHeap<Reverse<u64>>, target: u64) {
 
 fn benchmark_insert(c: &mut Criterion) {
     // Increase to 1 Million to make log(N) hurt more
-    let n = 1_000_000; 
-    
+    let n = 1_000_000;
+
     let mut group = c.benchmark_group("Insertion");
     group.sample_size(10); // Reduce samples because 1M takes time
 
@@ -44,7 +43,7 @@ fn benchmark_insert(c: &mut Criterion) {
 
 fn benchmark_cancel(c: &mut Criterion) {
     let n = 10_000; // Smaller N because Heap cancel is SO slow
-    
+
     let mut group = c.benchmark_group("Cancellation");
 
     group.bench_function("Wheel Cancel", |b| {

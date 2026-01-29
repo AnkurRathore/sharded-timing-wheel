@@ -1,10 +1,9 @@
-/// Hirarchical Timing Wheel Implementation
-/// Based on Varghese and Lauck's paper 
+/// Hierarchical Timing Wheel Implementation
+/// Based on Varghese and Lauck's paper
 /// "Hashed and Hierarchical Timing Wheels: Efficient Data Structures for Implementing a Timer Facility"
-
 mod slab;
 mod wheel;
-use crate::wheel::TimingWheel; 
+use crate::wheel::TimingWheel;
 use std::time::Instant;
 
 fn main() {
@@ -12,7 +11,7 @@ fn main() {
 
     let mut wheel = TimingWheel::new();
     let num_timers = 100_000;
-    
+
     println!("-> Inserting {} timers...", num_timers);
     let start_insert = Instant::now();
 
@@ -25,23 +24,39 @@ fn main() {
 
     let insert_time = start_insert.elapsed();
     println!("   Inserted {} timers in {:?}", num_timers, insert_time);
-    println!("   Rate: {:.2} million inserts/sec", (num_timers as f64 / insert_time.as_secs_f64()) / 1_000_000.0);
+    println!(
+        "   Rate: {:.2} million inserts/sec",
+        (num_timers as f64 / insert_time.as_secs_f64()) / 1_000_000.0
+    );
 
     println!("\n-> Running Tick Loop...");
     let start_tick = Instant::now();
-    
+
     let mut total_expired = 0;
     let mut ticks = 0;
 
+    // Create the reusable buffer ONCE (Zero-Allocation pattern)
+    let mut expired = Vec::with_capacity(1024);
+
     // Run ticks until all timers have expired
     while total_expired < num_timers {
-        let expired = wheel.tick();
+        // Pass the buffer to be filled
+        wheel.tick(&mut expired);
+
+        // Count how many expired in this tick
         total_expired += expired.len();
+
+        // CRITICAL: Clear the buffer so it can be reused in the next iteration.
+        // This keeps the capacity (memory) allocated, avoiding malloc calls.
+        expired.clear();
+
         ticks += 1;
-        
-        
+
         if ticks % 1000 == 0 {
-            println!("   Tick {}: Processed {} timers so far...", ticks, total_expired);
+            println!(
+                "   Tick {}: Processed {} timers so far...",
+                ticks, total_expired
+            );
         }
     }
 
@@ -49,7 +64,6 @@ fn main() {
     println!("   Finished in {:?}", tick_time);
     println!("   Total Ticks: {}", ticks);
     println!("   Total Expired: {}", total_expired);
-    
+
     println!("\n SUCCESS: The Wheel handled the load!");
 }
-
