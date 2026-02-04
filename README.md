@@ -41,17 +41,18 @@ I am currently implementing the "Scheme 6" Hierarchical Wheel:
 3. Cascading: Timers automatically "fall down" to lower-resolution wheels as time progresses.
 
 ## 🔬 Performance Goals
-### Benchmark Results
-Benchmarks run on `criterion` comparing `sharded-timing-wheel` vs `std::collections::BinaryHeap`.
+## 🔬 Benchmark Results
 
-| Operation | Scale (N) | Heap (Standard) | Wheel (v0.2 Optimized) | Improvement |
+Benchmarks run on `criterion` comparing `sharded-timing-wheel` vs `std::collections::BinaryHeap` using **randomized deadlines** (worst-case scenario).
+
+| Operation | Scale (N) | Heap (Standard) | Wheel (This Crate) | Improvement |
 | :--- | :--- | :--- | :--- | :--- |
-| **Insert** | 1,000,000 | **2.0 ms** | 46.0 ms | (Slower, but gap narrowed by 30%) |
-| **Cancel** | 10,000 | 50.6 ms | **0.030 ms** | **1,600x FASTER** |
+| **Insert** | 1,000,000 | **15.3 ms** | 57.0 ms | (Slower, but gap narrowed to ~3.7x) |
+| **Cancel** | 10,000 | 51.6 ms | **0.029 ms** | **1,700x FASTER** |
 
 ### Analysis
-*   **Insertion:** The Binary Heap wins on raw insertion because it is backed by a simple contiguous vector. The Wheel pays a constant-time overhead to maintain the Intrusive Doubly-Linked List nodes (updating `next`/`prev` pointers).
-*   **Cancellation:** This is the critical metric for network timeouts (TCP/QUIC). The Heap requires a linear scan ($O(N)$) to find a task to cancel. The Wheel uses the Slab index to locate and unlink the task in **$O(1)$ constant time**.
+*   **Insertion:** The Binary Heap is optimized for simple insertion, but random input forces it to rebalance ($O(\log N)$ swaps), slowing it down to ~15ms. The Wheel pays a constant overhead for Linked List pointer maintenance.
+*   **Cancellation:** This is the critical metric. The Wheel destroys the Heap here ($O(1)$ vs $O(N)$), making it the only viable choice for high-throughput network drivers where timers are cancelled frequently.
 
 ## 📚 References
 1. Varghese, G., & Lauck, A. (1987). Hashed and hierarchical timing wheels: data structures for the efficient implementation of a timer facility.

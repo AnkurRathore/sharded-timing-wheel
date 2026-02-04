@@ -2,6 +2,7 @@ use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use sharded_timing_wheel::wheel::TimingWheel;
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
+use rand::Rng;
 
 // Helper to find and remove from heap (simulating cancellation)
 fn heap_cancel(heap: &mut BinaryHeap<Reverse<u64>>, target: u64) {
@@ -16,16 +17,22 @@ fn benchmark_insert(c: &mut Criterion) {
     // Increase to 1 Million to make log(N) hurt more
     let n = 1_000_000;
 
+    // Pregenrate random deadlines
+    let mut rng = rand::thread_rng();
+    let mut random_deadlines = Vec::with_capacity(n);
+    for _ in 0..n {
+        // Random deadlines between 1 and 1000000
+        random_deadlines.push(rng.gen_range(1..1000_000));
+    }
     let mut group = c.benchmark_group("Insertion");
     group.sample_size(10); // Reduce samples because 1M takes time
 
     group.bench_function("Wheel Insert 1M", |b| {
         b.iter(|| {
             let mut wheel = TimingWheel::new();
-            // Pre-allocating fixes the resize overhead, making the comparison fair
-            // (You'd need to expose a with_capacity method, but for now standard is fine)
-            for i in 0..n {
-                wheel.insert(black_box(i), black_box(i as u64));
+            // using the pre-calculated random deadlines
+            for (i,&deadline) in random_deadlines.iter().enumerate() {
+                wheel.insert(black_box(i), black_box(deadline));
             }
         })
     });
@@ -33,8 +40,8 @@ fn benchmark_insert(c: &mut Criterion) {
     group.bench_function("Heap Insert 1M", |b| {
         b.iter(|| {
             let mut heap = BinaryHeap::new();
-            for i in 0..n {
-                heap.push(Reverse(black_box(i as u64)));
+            for (i,&deadline) in random_deadlines.iter().enumerate()  {
+                heap.push(Reverse(black_box(deadline)));
             }
         })
     });

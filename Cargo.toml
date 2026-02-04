@@ -9,6 +9,7 @@ repository = "https://github.com/ankurrathore/sharded-timing-wheel"
 
 [dependencies]
 criterion = "0.5"
+rand = "0.8"
 
 [[bench]]
 name = "wheel_benchmark"
