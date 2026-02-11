@@ -14,3 +14,7 @@ rand = "0.8"
 [[bench]]
 name = "wheel_benchmark"
 harness = false
+
+[profile.profiling]
+inherits = "release"
+debug = true
