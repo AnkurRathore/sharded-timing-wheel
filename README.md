@@ -5,8 +5,7 @@
 ![Status](https://img.shields.io/badge/status-active_development-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Rust](https://img.shields.io/badge/rust-1.70%2B-orange)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18886174.svg)](https://doi.org/10.5281/zenodo.18886174)
-
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.18886174-blue)](https://doi.org/10.5281/zenodo.18886174)
 ## ⚡ The Problem: The "C10M" Timer Challenge
 
 Standard approaches to timer management often rely on **Priority Queues** (like `std::collections::BinaryHeap` or typical Min-Heap implementations). While efficient for general use, these structures suffer at massive scale (1M+ concurrent timers):
@@ -14,7 +13,7 @@ Standard approaches to timer management often rely on **Priority Queues** (like 
 1.  **Algorithmic Complexity:** Insertion and Cancellation are **O(log N)**. As connections scale, CPU usage increases non-linearly.
 2.  **Pointer Chasing:** Tree-based heaps often scatter nodes across RAM. Traversing the structure causes massive **L1/L2 Cache Misses**.
 
-## 🚀 The Solution
+## The Solution
 
 This project implements a **Hierarchical Timing Wheel** (Hashed Wheel Timer) focused on **Data-Oriented Design**.
 
@@ -22,7 +21,7 @@ This project implements a **Hierarchical Timing Wheel** (Hashed Wheel Timer) foc
 *   **Memory Layout:** Uses a custom **Slab Allocator** (Arena) to keep all timer data in contiguous memory, maximizing CPU cache pre-fetching.
 *   **Zero-Allocation:** After the initial warmup, the system generates zero heap allocations during runtime.
 
-## 🏗️ Architecture
+## Architecture
 
 ### 1. The Engine: Intrusive Slab Allocator 
 Instead of using `Vec<Box<Node>>`, I have implemented a custom Slab with an **Intrusive Free List**.
