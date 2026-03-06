@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Rathore"
+    given-names: "Ankur"
+    orcid: "https://orcid.org/0009-0009-9573-5002" 
+title: "sharded-timing-wheel: A cache-friendly hierarchical timing wheel in Rust"
+version: 0.2.0
+date-released: 2026-02-16
+url: "https://github.com/AnkurRathore/sharded-timing-wheel"
+license: MIT
