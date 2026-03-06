@@ -5,6 +5,7 @@
 ![Status](https://img.shields.io/badge/status-active_development-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Rust](https://img.shields.io/badge/rust-1.70%2B-orange)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18886174.svg)](https://doi.org/10.5281/zenodo.18886174)
 
 ## ⚡ The Problem: The "C10M" Timer Challenge
 
@@ -61,7 +62,12 @@ I am currently implementing the "Scheme 6" Hierarchical Wheel:
     *   The **Heap** requires an $O(N)$ linear scan to find a task to cancel.
     *   The **Wheel** uses the Slab index (Handle) to unlink the node in **$O(1)$ constant time**, regardless of how many timers exist.
 
-## 📚 References
+## Citation
+If you use `sharded-timing-wheel` in your research or project, please cite it as:
+
+> Rathore, Ankur. (2026). sharded-timing-wheel: A cache-aware, hierarchical timing wheel implementation (v0.2.0). Zenodo. https://doi.org/10.5281/zenodo.18886174
+
+## References
 1. Varghese, G., & Lauck, A. (1987). Hashed and hierarchical timing wheels: data structures for the efficient implementation of a timer facility.
 2. Acton, M. (2014). Data-Oriented Design and C++. (CppCon).
 3. Gregg, B. Systems Performance: Enterprise and the Cloud.
